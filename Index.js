@@ -26,6 +26,40 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
+
+    // start coding
+
+    // creating database and collection
+
+    const dataBase = client.db("karamPlate");
+    const foodCollection = dataBase.collection("foodCollection");
+
+    // starting crud method
+
+    app.post("/foodCollection", async (req, res) => {
+      const foodDetails = req.body;
+      foodDetails.quantity = parseInt(foodDetails.quantity);
+      foodDetails.expiry = new Date(foodDetails.expiry);
+      console.log(foodDetails);
+      const result = await foodCollection.insertOne(foodDetails);
+      res.send(result);
+    });
+
+    // most 6 food having most available quantity
+
+    app.get("/featureFoods", async (req, res) => {
+      const now = new Date();
+      const trendingFoods = await foodCollection
+        .find({
+          status: "available",
+          expiry: { $gte: now },
+        })
+        .sort({ quantity: -1 })
+        .limit(6)
+        .toArray();
+
+      res.send(trendingFoods);
+    });
   } finally {
   }
 }
