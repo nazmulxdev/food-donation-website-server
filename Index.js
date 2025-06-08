@@ -60,6 +60,37 @@ async function run() {
 
       res.send(trendingFoods);
     });
+
+    // get all available foods api
+    app.get("/foodCollection", async (req, res) => {
+      const sortBY = req.query.sort || "all";
+      const searchBY = req.query.search || "";
+
+      let sorting = {};
+
+      if (sortBY === "ascending") {
+        sorting = { expiry: 1 };
+      } else if (sortBY === "descending") {
+        sorting = { expiry: -1 };
+      }
+
+      const query = {
+        status: "available",
+      };
+
+      if (searchBY) {
+        query.foodName = { $regex: searchBY, $options: "i" };
+      }
+
+      let availableFoodsCursor = foodCollection.find(query);
+
+      if (sortBY !== "all") {
+        availableFoodsCursor = availableFoodsCursor.sort(sorting);
+      }
+
+      const availAbleFoods = await availableFoodsCursor.toArray();
+      res.send(availAbleFoods);
+    });
   } finally {
   }
 }
