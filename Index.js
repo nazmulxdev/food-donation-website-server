@@ -66,6 +66,10 @@ async function run() {
     const dataBase = client.db("karamPlate");
     const foodCollection = dataBase.collection("foodCollection");
 
+    const requestedFoodsCollection = dataBase.collection(
+      "requestedFoodsCollections",
+    );
+
     // starting crud method
 
     app.post("/foodCollection", async (req, res) => {
@@ -133,6 +137,34 @@ async function run() {
 
       const result = await foodCollection.findOne(query);
       res.send(result);
+    });
+
+    // post method for adding requested food in the requestedFoodsCollection
+    app.post("/requestedFoods", fireBaseToken, async (req, res) => {
+      const userEmail = req.body.userEmail;
+      if (req.fireBaseVerifiedEmail !== userEmail) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      // starting crud methods
+      const requestedFood = req.body;
+      const foodId = requestedFood.foodId;
+      const query = { _id: new ObjectId(foodId) };
+      const updateDoc = {
+        $set: {
+          status: "requested",
+        },
+      };
+      const insertRequestedFood = await requestedFoodsCollection.insertOne(
+        requestedFood,
+      );
+
+      const updateStatus = await foodCollection.updateOne(query, updateDoc);
+
+      res.send({
+        message: "Food requested successfully",
+        insertRequestedFood,
+        updateStatus,
+      });
     });
   } finally {
   }
