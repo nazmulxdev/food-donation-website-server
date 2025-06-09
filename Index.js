@@ -166,6 +166,18 @@ async function run() {
         updateStatus,
       });
     });
+
+    // get method to get donated food by the donner email
+    app.get("/donatedFoods", fireBaseToken, async (req, res) => {
+      const email = req.query.email;
+      if (req.fireBaseVerifiedEmail !== email) {
+        res.status(403).send({ message: "forbidden access" });
+      }
+
+      const query = { donarEmail: email };
+      const result = await foodCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
