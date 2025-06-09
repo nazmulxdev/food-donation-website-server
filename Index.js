@@ -171,7 +171,7 @@ async function run() {
     app.get("/donatedFoods", fireBaseToken, async (req, res) => {
       const email = req.query.email;
       if (req.fireBaseVerifiedEmail !== email) {
-        res.status(403).send({ message: "forbidden access" });
+        return res.status(403).send({ message: "forbidden access" });
       }
 
       const query = { donarEmail: email };
@@ -183,7 +183,7 @@ async function run() {
     app.get("/requestedFoods", fireBaseToken, async (req, res) => {
       const email = req.query.email;
       if (req.fireBaseVerifiedEmail !== email) {
-        res.status(403).send({ message: "forbidden access" });
+        return res.status(403).send({ message: "forbidden access" });
       }
       const query = { userEmail: email };
       const result = await requestedFoodsCollection.find(query).toArray();
@@ -196,7 +196,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       const { userEmail, ...updatedData } = req.body;
       if (req.fireBaseVerifiedEmail !== userEmail) {
-       return res.status(403).send({ message: "forbidden access" });
+        return res.status(403).send({ message: "forbidden access" });
       }
 
       if (updatedData.quantity) {
@@ -213,6 +213,22 @@ async function run() {
       };
 
       const result = await foodCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // delete method to delete donated food from api
+    app.delete("/foodCollection/:id", fireBaseToken, async (req, res) => {
+      const { id } = req.params;
+      const email = req.query.email;
+      if (req.fireBaseVerifiedEmail !== email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      const query = {
+        _id: new ObjectId(id),
+      };
+
+      const result = await foodCollection.deleteOne(query);
       res.send(result);
     });
   } finally {
