@@ -27,6 +27,28 @@ const client = new MongoClient(process.env.MONGO_URI, {
   },
 });
 
+// firebase middleware to verify token
+const fireBaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
+    return res.status(401).send({ message: "Unauthorize access" });
+  }
+
+  // firebase token
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorize access" });
+  }
+
+  try {
+    const tokenInfo = await admin.auth().verifyIdToken(token);
+    req.fireBaseVerifiedEmail = tokenInfo.email;
+    next();
+  } catch (error) {
+    return res.status(401).send({ message: "Unauthorize access" });
+  }
+};
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
