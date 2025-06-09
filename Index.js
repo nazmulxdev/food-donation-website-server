@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
+import admin from 'firebase-admin';
 
 const app = express();
 const port = process.env.PORT || 3000;
