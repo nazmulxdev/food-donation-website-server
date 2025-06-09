@@ -189,6 +189,32 @@ async function run() {
       const result = await requestedFoodsCollection.find(query).toArray();
       res.send(result);
     });
+
+    // put method to update the donated food
+    app.put("/foodCollection/:id", fireBaseToken, async (req, res) => {
+      const { id } = req.params;
+      const filter = { _id: new ObjectId(id) };
+      const { userEmail, ...updatedData } = req.body;
+      if (req.fireBaseVerifiedEmail !== userEmail) {
+       return res.status(403).send({ message: "forbidden access" });
+      }
+
+      if (updatedData.quantity) {
+        updatedData.quantity = parseInt(updatedData.quantity);
+      }
+
+      if (updatedData.expiry) {
+        updatedData.expiry = new Date(updatedData.expiry);
+      }
+
+      console.log(updatedData);
+      const updatedDoc = {
+        $set: updatedData,
+      };
+
+      const result = await foodCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
   } finally {
   }
 }
