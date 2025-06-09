@@ -178,6 +178,17 @@ async function run() {
       const result = await foodCollection.find(query).toArray();
       res.send(result);
     });
+
+    // get all requested food by email address
+    app.get("/requestedFoods", fireBaseToken, async (req, res) => {
+      const email = req.query.email;
+      if (req.fireBaseVerifiedEmail !== email) {
+        res.status(403).send({ message: "forbidden access" });
+      }
+      const query = { userEmail: email };
+      const result = await requestedFoodsCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
