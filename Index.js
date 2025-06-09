@@ -2,13 +2,22 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
-import admin from 'firebase-admin';
+import admin from "firebase-admin";
 
+const decoded = Buffer.from(process.env.FIREBASE_SDK, "base64").toString(
+  "utf-8",
+);
+
+const serviceAccount = JSON.parse(decoded);
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: {
