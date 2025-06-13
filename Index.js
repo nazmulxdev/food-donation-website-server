@@ -13,11 +13,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+app.use(express.json());
 
 const client = new MongoClient(process.env.MONGO_URI, {
   serverApi: {
@@ -27,7 +24,12 @@ const client = new MongoClient(process.env.MONGO_URI, {
   },
 });
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 // firebase middleware to verify token
+
 const fireBaseToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer")) {
@@ -51,14 +53,6 @@ const fireBaseToken = async (req, res, next) => {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
-    );
-
     // start coding
 
     // creating database and collection
@@ -76,7 +70,6 @@ async function run() {
       const foodDetails = req.body;
       foodDetails.quantity = parseInt(foodDetails.quantity);
       foodDetails.expiry = new Date(foodDetails.expiry);
-      console.log(foodDetails);
       const result = await foodCollection.insertOne(foodDetails);
       res.send(result);
     });
@@ -206,8 +199,6 @@ async function run() {
       if (updatedData.expiry) {
         updatedData.expiry = new Date(updatedData.expiry);
       }
-
-      console.log(updatedData);
       const updatedDoc = {
         $set: updatedData,
       };
@@ -231,6 +222,8 @@ async function run() {
       const result = await foodCollection.deleteOne(query);
       res.send(result);
     });
+
+    // firebase token authentication
   } finally {
   }
 }
@@ -243,3 +236,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log("This server is running on port", port);
 });
+
+// export default app;

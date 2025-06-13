@@ -12,7 +12,7 @@
 
 # Project's Live Site Link
 
-- pending
+- https://new-meals4gaza.vercel.app/
 
 # Key Feature of this Project
 
